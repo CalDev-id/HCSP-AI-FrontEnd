@@ -2,6 +2,7 @@ import ECommerce from "@/components/Dashboard/E-commerce";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import SignIn from "./auth/signin/page";
+import HomePage from "./home/page";
 
 export const metadata: Metadata = {
   title:
@@ -15,7 +16,9 @@ export default function Home() {
       {/* <DefaultLayout>
         <ECommerce />
       </DefaultLayout> */}
-      <SignIn />
+      {/* <SignIn /> */}
+      {/* <Home /> */}
+      <HomePage />
     </>
   );
 }
