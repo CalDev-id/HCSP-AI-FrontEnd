@@ -6,8 +6,8 @@ import HomePage from "./home/page";
 
 export const metadata: Metadata = {
   title:
-    "Next.js E-commerce Dashboard | TailAdmin - Next.js Dashboard Template",
-  description: "This is Next.js Home for TailAdmin Dashboard Template",
+    "HCSP-AI",
+  description: "HCAI is a platform for managing and monitoring AI models, providing tools for deployment, scaling, and performance tracking.",
 };
 
 export default function Home() {

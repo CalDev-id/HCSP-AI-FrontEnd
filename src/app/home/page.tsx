@@ -1,11 +1,10 @@
-
-
 //----------------------------------------------------------------------------------
 
 "use client";
 
 import { useState } from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import ReactMarkdown from "react-markdown";
 
 type Message = {
   sender: "user" | "bot";
@@ -22,30 +21,41 @@ const HomePage = () => {
 
     const userMessage: Message = { sender: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
+    setInput("");
     setLoading(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/ai_agent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://swan-intimate-positively.ngrok-free.app/webhook/rag-hcai",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId: "tes",
+            prompt: input,
+          }),
         },
-        body: JSON.stringify({ user_prompt: input }),
-      });
+      );
 
       const data = await res.json();
-      const botReply: Message = { sender: "bot", content: data.response };
+      const botReply: Message = {
+        sender: "bot",
+        content:
+          data.response || data.prompt || "⚠️ Tidak ada jawaban dari AI.",
+      };
       setMessages((prev) => [...prev, botReply]);
     } catch (err) {
       console.error("API error:", err);
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", content: "⚠️ Terjadi kesalahan saat menghubungi API." },
+        {
+          sender: "bot",
+          content: "⚠️ Terjadi kesalahan saat menghubungi API.",
+        },
       ]);
+    } finally {
+      setLoading(false);
     }
-
-    setInput("");
-    setLoading(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -57,8 +67,7 @@ const HomePage = () => {
 
   return (
     <DefaultLayout>
-      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8 space-y-4 w-full">
-
+      <div className="flex min-h-screen w-full flex-col items-center justify-center space-y-4 px-4 py-8">
         {/* Logo dan Welcome jika belum ada chat */}
         {messages.length === 0 ? (
           <>
@@ -87,14 +96,15 @@ const HomePage = () => {
                 />
               </svg>
             </div>
-            <p className="text-gray-600 text-base max-w-md text-center">
-              Welcome to HCSP-AI! Access insights to enhance decisions and build teams.
+            <p className="max-w-md text-center text-base text-gray-600">
+              Welcome to HCSP-AI! Access insights to enhance decisions and build
+              teams.
             </p>
           </>
         ) : (
           <>
             {/* Chat bubbles */}
-            <div className="flex flex-col space-y-2 w-full max-w-2xl">
+            <div className="flex w-full max-w-2xl flex-col space-y-2">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
@@ -103,19 +113,20 @@ const HomePage = () => {
                   }`}
                 >
                   <div
-                    className={`rounded-xl px-4 py-2 text-sm max-w-full break-words ${
+                    className={`max-w-full break-words rounded-xl px-4 py-2 text-sm ${
                       msg.sender === "user"
                         ? "bg-green-500 text-white"
                         : "bg-gray-100 text-gray-800"
                     }`}
+                    style={{ whiteSpace: "pre-wrap" }} // menjaga newline
                   >
-                    {msg.content}
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
                   </div>
                 </div>
               ))}
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-100 px-4 py-2 rounded-xl text-sm text-gray-500 animate-pulse">
+                  <div className="animate-pulse rounded-xl bg-gray-100 px-4 py-2 text-sm text-gray-500">
                     HCSP-AI sedang mengetik...
                   </div>
                 </div>
@@ -126,22 +137,22 @@ const HomePage = () => {
 
         {/* Input */}
         <div className="w-full max-w-2xl pt-4">
-          <div className="flex items-center border border-gray-300 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center rounded-xl border border-gray-300 p-4 shadow-sm">
             <input
               type="text"
               placeholder="Ask HCSP-AI anything"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-grow bg-transparent outline-none text-gray-800 placeholder-gray-400"
+              className="flex-grow bg-transparent text-gray-800 placeholder-gray-400 outline-none"
             />
             <button
               onClick={sendMessage}
               disabled={loading}
-              className="bg-green-500 hover:bg-green-600 text-white rounded-full p-2 transition disabled:opacity-50"
+              className="rounded-full bg-green-500 p-2 text-white transition hover:bg-green-600 disabled:opacity-50"
             >
               <svg
-                className="w-5 h-5"
+                className="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -163,5 +174,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-//----------------------------------------------------------------------------------
