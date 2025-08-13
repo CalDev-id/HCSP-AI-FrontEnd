@@ -136,7 +136,7 @@ const HomePage = () => {
         )}
 
         {/* Input */}
-        <div className="w-full max-w-2xl pt-4">
+        <div className="w-full max-w-2xl mt-4 fixed bottom-40 bg-white rounded-xl">
           <div className="flex items-center rounded-xl border border-gray-300 p-4 shadow-sm">
             <input
               type="text"
