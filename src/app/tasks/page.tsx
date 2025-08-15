@@ -2,71 +2,76 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import TableFive from "@/components/Tables/TableFive";
 import TableOne from "@/components/Tables/TableOne";
 import Link from "next/link";
+import CardTasks from "@/components/CardTasks/CardTasks";
 
 const CabangPage = () => {
+  const tasks = [
+    { opened: "Opened 5 times", taskTitle: "Profile Match Up Promosi" },
+    { opened: "Opened 3 times", taskTitle: "Mutasi Antar Divisi" },
+    { opened: "Opened 7 times", taskTitle: "Job Vacancy Internal" },
+    { opened: "Opened 2 times", taskTitle: "Learning Recommendation" },
+  ];
+
   return (
     <DefaultLayout>
       {/* <TableFive /> */}
-      <section>
-        <h2 className="text-2xl font-bold text-black">Browse Tasks</h2>
-        <p className="text-black">
-          Discover and create premade tasks that combine multiple instructions
-          and specific knowledge
-        </p>
+      <div className="flex w-full flex-col lg:flex-row h-screen">
+        <section className="w-full pr-50">
+          <h2 className="text-2xl font-bold text-black">Browse Tasks</h2>
+          <p className="text-black">
+            Discover and create premade tasks that combine multiple instructions
+            and specific knowledge
+          </p>
 
-        <label className="input my-5 rounded-2xl w-96">
-          <svg
-            className="h-[1em] opacity-80"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-          >
-            <g
-              strokeLinejoin="round"
-              strokeLinecap="round"
-              strokeWidth="2.5"
-              fill="none"
-              stroke="currentColor"
+          <label className="input my-5 w-96 rounded-2xl">
+            <svg
+              className="h-[1em] opacity-80"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
             >
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.3-4.3"></path>
-            </g>
-          </svg>
-          <input type="search" required placeholder="Search tasks" />
-        </label>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {/* The modal */}
-          <label
-            htmlFor="my_modal_7"
-            className="flex cursor-pointer flex-col items-start rounded-xl border border-slate-400 bg-[#dbfcf2] p-4 pb-20"
-          >
-            <p className="text-sm text-slate-600">Opened 5 times</p>
-            <h1 className="font-semibold text-[#23a969]">
-              Profile Match Up Promosi
-            </h1>
+              <g
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeWidth="2.5"
+                fill="none"
+                stroke="currentColor"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </g>
+            </svg>
+            <input type="search" required placeholder="Search tasks" />
           </label>
 
-          {/* Put this part before </body> tag */}
-          <input type="checkbox" id="my_modal_7" className="modal-toggle" />
-          <div className="modal" role="dialog">
-            <div className="modal-box rounded-xl border border-slate-400">
-              <h3 className="text-lg font-bold">Profile Match Up Promosi</h3>
-              <p className="py-4">This modal works with a hidden checkbox!</p>
-              
-              <p>Instruction</p>
-              <textarea className="textarea" placeholder="Instruksi"></textarea>
-              <p>Knowledge</p>
-              <input type="file" className="file-input" />
-              <div className="flex justify-end">
-                <button className="btn rounded-full bg-black text-white">Run</button>
-              </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {tasks.map((task, index) => (
+              <CardTasks
+                key={index}
+                opened={task.opened}
+                taskTitle={task.taskTitle}
+              />
+            ))}
+          </div>
+        </section>
+        <div className="flex items-center justify-center h-1/2">
+          <div className="w-96">
+            <p className="bg-greenSecondary text-greenPrimary w-fit rounded-2xl p-2 px-8 font-semibold">
+              All Tasks
+            </p>
+            <p className="rounded-2xl p-2 px-8 ">Created by me</p>
+            <p className="rounded-2xl p-2 px-8 pb-15">My recently used</p>
+            <p className="w-fit rounded-full border border-slate-400 p-2 px-4 font-semibold">
+              + Create Tasks
+            </p>
+            <div className="text-sm text-slate-600 mt-2">
+              <p className="mt-2">Vacant position & fullfillment status</p>
+              <p className="mt-2">Probation Status Overview</p>
+              <p className="mt-2">Potential Reassessment</p>
+              <p className="mt-2">Talent Tracker</p>
             </div>
-            <label className="modal-backdrop" htmlFor="my_modal_7">
-              Close
-            </label>
           </div>
         </div>
-      </section>
+      </div>
     </DefaultLayout>
   );
 };
