@@ -2,7 +2,12 @@
 
 import React from "react";
 
-const CardTasks = ({ opened, taskTitle }) => {
+interface CardTasksProps {
+  opened: string;
+  taskTitle: string;
+}
+
+const CardTasks: React.FC<CardTasksProps> = ({ opened, taskTitle }) => {
   return (
     <div>
       {/* Card yang membuka modal */}
