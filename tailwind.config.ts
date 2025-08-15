@@ -342,6 +342,9 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("daisyui")],
+  daisyui: {
+    themes: ["light"], // default hanya light
+  },
 };
 export default config;
