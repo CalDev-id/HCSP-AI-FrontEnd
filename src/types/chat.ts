@@ -6,3 +6,12 @@ export type ChatMessage = {
   message: string;
   created_at: string; // bisa pakai Date kalau mau
 };
+
+export type Chat = {
+  avatar: string;
+  name: string;
+  text: string;
+  address: string;
+  phone: string;
+  email: string;
+};
