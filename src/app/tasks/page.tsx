@@ -46,6 +46,7 @@ const CabangPage = () => {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {tasks.map((task, index) => (
+              
               <CardTasks
                 key={index}
                 opened={task.opened}
@@ -61,9 +62,41 @@ const CabangPage = () => {
             </p>
             <p className="rounded-2xl p-2 px-8 ">Created by me</p>
             <p className="rounded-2xl p-2 px-8 pb-15">My recently used</p>
-            <p className="w-fit rounded-full border border-slate-400 p-2 px-4 font-semibold">
+            {/* <p className="w-fit rounded-full border border-slate-400 p-2 px-4 font-semibold">
               + Create Tasks
-            </p>
+            </p> */}
+            <div className="w-fit">
+  {/* Tombol + Create Tasks */}
+  <label
+    htmlFor="modal_create_task"
+    className="w-fit cursor-pointer rounded-full border border-slate-400 p-2 px-4 font-semibold"
+  >
+    + Create Tasks
+  </label>
+
+  {/* Modal */}
+  <input type="checkbox" id="modal_create_task" className="modal-toggle" />
+  <div className="modal" role="dialog">
+    <div className="modal-box rounded-xl border border-slate-400">
+      <h3 className="text-lg font-bold">Create New Task</h3>
+
+      <p className="py-4">Editable Fields</p>
+      <p>Instruction</p>
+      <textarea className="textarea" placeholder="Instruksi"></textarea>
+
+      <p>Knowledge</p>
+      <input type="file" className="file-input" />
+
+      <div className="flex justify-end mt-4">
+        <button className="btn rounded-full bg-black text-white">Run</button>
+      </div>
+    </div>
+    <label className="modal-backdrop" htmlFor="modal_create_task">
+      Close
+    </label>
+  </div>
+</div>
+
             <div className="text-sm text-slate-600 mt-2">
               <p className="mt-2">Vacant position & fullfillment status</p>
               <p className="mt-2">Probation Status Overview</p>

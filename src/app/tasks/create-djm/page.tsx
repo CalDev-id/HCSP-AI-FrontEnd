@@ -1,89 +1,31 @@
-// // app/chat/[sessionId]/page.tsx
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import { useParams } from "next/navigation";
-// import { supabase } from "@/lib/supabaseClient";
-// import type { ChatMessage } from "@/types/chat";
-
-// export default function ChatPage() {
-//   const { sessionId } = useParams();
-//   const [messages, setMessages] = useState<ChatMessage[]>([]);
-
-//   useEffect(() => {
-//     if (!sessionId) return;
-
-//     // Fetch initial messages
-//     const fetchMessages = async () => {
-//       const { data, error } = await supabase
-//         .from("chat_messages")
-//         .select("*")
-//         .eq("session_id", sessionId)
-//         .order("id", { ascending: true });
-
-//       if (!error && data) setMessages(data as ChatMessage[]);
-//     };
-
-//     fetchMessages();
-
-//     // Subscribe realtime
-//     const channel = supabase
-//       .channel("chat-messages")
-//       .on(
-//         "postgres_changes",
-//         { event: "INSERT", schema: "public", table: "chat_messages" },
-//         (payload) => {
-//           if (payload.new.session_id === sessionId) {
-//             setMessages((prev) => [...prev, payload.new as ChatMessage]);
-//           }
-//         }
-//       )
-//       .subscribe();
-
-//     return () => {
-//       supabase.removeChannel(channel);
-//     };
-//   }, [sessionId]);
-
-//   return (
-//     <div className="p-4">
-//       <h1 className="font-bold mb-4">Chat Session: {sessionId}</h1>
-//       <div className="space-y-2">
-//         {messages.map((m) => (
-//           <div
-//             key={m.id}
-//             className={`p-2 rounded ${
-//               m.sender === "user" ? "bg-blue-100 text-blue-800" : "bg-gray-200"
-//             }`}
-//           >
-//             <strong>{m.sender}:</strong> {m.message}
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // ambil param dari URL
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/lib/supabaseClient";
 import { ChatMessage } from "@/types/chat";
+import { v4 as uuidv4 } from "uuid";
+import { useParams } from "next/navigation";
 
-const ChatPage = () => {
-  const { sessionId } = useParams<{ sessionId: string }>(); // dapet "session2" dll
-
-  const [input, setInput] = useState("");
+const TaskDetailPage = () => {
+  const params = useParams();
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [agent, setAgent] = useState<string | null>(null);
 
-  // Fetch history + agent
+  // generate session baru setiap buka halaman
   useEffect(() => {
+    const newId = uuidv4();
+    localStorage.setItem("chat_session_id", newId);
+    setSessionId(newId);
+  }, []);
+
+  // fetch awal + realtime
+  useEffect(() => {
+    if (!sessionId) return;
+
     const fetchHistory = async () => {
       const { data, error } = await supabase
         .from("chat_messages")
@@ -93,30 +35,24 @@ const ChatPage = () => {
 
       if (!error && data) {
         setMessages(data as ChatMessage[]);
-
-        if (data.length > 0) {
-          setAgent(data[0].agent); // ambil agent dari pesan pertama
-        }
       }
     };
 
     fetchHistory();
 
-    // Realtime listener
     const channel = supabase
-      .channel(`chat:${sessionId}`)
+      .channel("chat-room")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_messages" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: `session_id=eq.${sessionId}`,
+        },
         (payload) => {
           const newMsg = payload.new as ChatMessage;
-          if (newMsg.session_id === sessionId) {
-            setMessages((prev) => [...prev, newMsg]);
-
-            if (!agent && newMsg.agent) {
-              setAgent(newMsg.agent);
-            }
-          }
+          setMessages((prev) => [...prev, newMsg]);
         }
       )
       .subscribe();
@@ -124,25 +60,30 @@ const ChatPage = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [sessionId, agent]);
+  }, [sessionId]);
 
-// Send message
   const sendMessage = async () => {
-    if (!input.trim() || !sessionId || !agent) return;
+    if (!input.trim() || !sessionId) return;
 
     setLoading(true);
     const userText = input;
     setInput("");
 
     try {
-      await fetch(agent, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          prompt: userText,
-        }),
-      });
+      const res = await fetch(
+        "https://swan-intimate-positively.ngrok-free.app/webhook/create-djm",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            prompt: userText,
+          }),
+        }
+      );
+
+      await res.json();
+      // realtime akan otomatis update
     } catch (err) {
       console.error("API error:", err);
     } finally {
@@ -157,9 +98,15 @@ const ChatPage = () => {
     }
   };
 
+  if (!sessionId) return <div>Loading session...</div>;
+
   return (
     <DefaultLayout>
       <div className="flex min-h-screen w-full flex-col items-center justify-center space-y-4 px-4 py-8">
+        <h1 className="text-2xl font-bold mb-4">
+          Task: create-djm
+        </h1>
+
         {messages.length === 0 ? (
           <>
             <div className="flex items-center space-x-2">
@@ -261,4 +208,4 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+export default TaskDetailPage;

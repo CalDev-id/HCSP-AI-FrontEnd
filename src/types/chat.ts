@@ -5,6 +5,7 @@ export type ChatMessage = {
   sender: "user" | "bot"; // sesuai definisi tabel
   message: string;
   created_at: string; // bisa pakai Date kalau mau
+  agent: string;
 };
 
 export type Chat = {
