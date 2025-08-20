@@ -1,121 +1,34 @@
+// // app/chat/[sessionId]/page.tsx
 // "use client";
 
 // import { useEffect, useState } from "react";
+// import { useParams } from "next/navigation";
 // import { supabase } from "@/lib/supabaseClient";
-// import { ChatMessage } from "@/types/chat";
-// import DefaultLayout from "@/components/Layouts/DefaultLayout";
+// import type { ChatMessage } from "@/types/chat";
 
-// export default function DashboardPage() {
+// export default function ChatPage() {
+//   const { sessionId } = useParams();
 //   const [messages, setMessages] = useState<ChatMessage[]>([]);
-//   const sessionId = "session1"; // hardcode dulu
 
 //   useEffect(() => {
-//     async function fetchChats() {
-//       const { data, error } = await supabase
-//         .from("n8n_chat_histories")
-//         .select("id, session_id, message")
-//         .eq("session_id", sessionId)
-//         .order("id", { ascending: true });
+//     if (!sessionId) return;
 
-//       if (error) {
-//         console.error("Fetch error:", error);
-//         return;
-//       }
-
-//       if (data) {
-//         // parse message JSON
-//         const parsed = data.map((row) => ({
-//           id: row.id,
-//           session_id: row.session_id,
-//           sender: row.message.type === "human" ? "user" : "bot",
-//           content: row.message.content,
-//         }));
-//         setMessages(parsed);
-//       }
-//     }
-
-//     fetchChats();
-
-//     // subscribe realtime
-//     const channel = supabase
-//       .channel("chat-channel")
-//       .on(
-//         "postgres_changes",
-//         { event: "INSERT", schema: "public", table: "n8n_chat_histories" },
-//         (payload) => {
-//           if (payload.new.session_id === sessionId) {
-//             const newMsg = {
-//               id: payload.new.id,
-//               session_id: payload.new.session_id,
-//               sender: payload.new.message.type === "human" ? "user" : "bot",
-//               content: payload.new.message.content,
-//             };
-//             setMessages((prev) => [...prev, newMsg]);
-//           }
-//         }
-//       )
-//       .subscribe();
-
-//     return () => {
-//       supabase.removeChannel(channel);
-//     };
-//   }, [sessionId]);
-
-//   return (
-//     <DefaultLayout>
-//       <div className="flex flex-col space-y-2 p-4">
-//         {messages.length === 0 && (
-//           <p className="text-gray-500">Belum ada chat untuk {sessionId}</p>
-//         )}
-
-//         {messages.map((msg) => (
-//           <div
-//             key={msg.id}
-//             className={`p-3 rounded-lg max-w-lg ${
-//               msg.sender === "user"
-//                 ? "bg-blue-500 text-white self-end"
-//                 : "bg-gray-200 text-black self-start"
-//             }`}
-//           >
-//             {msg.content}
-//           </div>
-//         ))}
-//       </div>
-//     </DefaultLayout>
-//   );
-// }
-
-
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import { supabase } from "@/lib/supabaseClient";
-// import { ChatMessage } from "@/types/chat";
-// import DefaultLayout from "@/components/Layouts/DefaultLayout";
-
-// export default function DashboardPage() {
-//   const [messages, setMessages] = useState<ChatMessage[]>([]);
-//   const sessionId = "session1"; // sementara hardcode
-
-//   useEffect(() => {
-//     async function fetchChats() {
+//     // Fetch initial messages
+//     const fetchMessages = async () => {
 //       const { data, error } = await supabase
 //         .from("chat_messages")
-//         .select("id, session_id, sender, message, created_at")
+//         .select("*")
 //         .eq("session_id", sessionId)
 //         .order("id", { ascending: true });
 
-//       if (error) {
-//         console.error("Fetch error:", error);
-//       } else if (data) {
-//         setMessages(data);
-//       }
-//     }
-//     fetchChats();
+//       if (!error && data) setMessages(data as ChatMessage[]);
+//     };
 
-//     // subscribe realtime
+//     fetchMessages();
+
+//     // Subscribe realtime
 //     const channel = supabase
-//       .channel("chat-channel")
+//       .channel("chat-messages")
 //       .on(
 //         "postgres_changes",
 //         { event: "INSERT", schema: "public", table: "chat_messages" },
@@ -133,46 +46,45 @@
 //   }, [sessionId]);
 
 //   return (
-//     <DefaultLayout>
-//       <div className="flex flex-col space-y-2 p-4">
-//         {messages.length === 0 && (
-//           <p className="text-gray-500">Belum ada chat untuk {sessionId}</p>
-//         )}
-
-//         {messages.map((msg) => (
+//     <div className="p-4">
+//       <h1 className="font-bold mb-4">Chat Session: {sessionId}</h1>
+//       <div className="space-y-2">
+//         {messages.map((m) => (
 //           <div
-//             key={msg.id}
-//             className={`p-3 rounded-lg max-w-lg ${
-//               msg.sender === "user"
-//                 ? "bg-blue-500 text-white self-end"
-//                 : "bg-gray-200 text-black self-start"
+//             key={m.id}
+//             className={`p-2 rounded ${
+//               m.sender === "user" ? "bg-blue-100 text-blue-800" : "bg-gray-200"
 //             }`}
 //           >
-//             {msg.message}
+//             <strong>{m.sender}:</strong> {m.message}
 //           </div>
 //         ))}
 //       </div>
-//     </DefaultLayout>
+//     </div>
 //   );
 // }
+
 
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation"; // ambil param dari URL
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/lib/supabaseClient";
 import { ChatMessage } from "@/types/chat";
 
-const HomePage = () => {
+const ChatPage = () => {
+  const { sessionId } = useParams<{ sessionId: string }>(); // dapet "session2" dll
+
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const sessionId = "session3";
-
   // fetch awal history
   useEffect(() => {
+    if (!sessionId) return;
+
     const fetchHistory = async () => {
       const { data, error } = await supabase
         .from("chat_messages")
@@ -189,7 +101,7 @@ const HomePage = () => {
 
     // subscribe realtime
     const channel = supabase
-      .channel("chat-room")
+      .channel(`chat-room-${sessionId}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "chat_messages" },
@@ -207,37 +119,33 @@ const HomePage = () => {
     };
   }, [sessionId]);
 
-const sendMessage = async () => {
-  if (!input.trim()) return;
+  const sendMessage = async () => {
+    if (!input.trim() || !sessionId) return;
 
-  setLoading(true);
-  const userText = input;
-  setInput("");
+    setLoading(true);
+    const userText = input;
+    setInput("");
 
-  try {
-    // 1. Hit API — API akan tulis userMessage + botReply ke Supabase
-    const res = await fetch(
-      "https://swan-intimate-positively.ngrok-free.app/webhook/create-djm",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          prompt: userText,
-        }),
-      }
-    );
-
-    await res.json(); // response ga dipakai langsung
-    // 2. Chat baru otomatis muncul via Realtime subscription
-  } catch (err) {
-    console.error("API error:", err);
-    // kalau mau bisa kasih notifikasi error di UI aja
-  } finally {
-    setLoading(false);
-  }
-};
-
+    try {
+      // Hit API (API akan tulis userMessage + botReply ke Supabase)
+      await fetch(
+        "https://swan-intimate-positively.ngrok-free.app/webhook/create-djm",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            prompt: userText,
+          }),
+        }
+      );
+      // response tidak dipakai langsung karena realtime akan update otomatis
+    } catch (err) {
+      console.error("API error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -350,4 +258,4 @@ const sendMessage = async () => {
   );
 };
 
-export default HomePage;
+export default ChatPage;

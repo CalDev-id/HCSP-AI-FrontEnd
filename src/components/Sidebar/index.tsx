@@ -7,7 +7,14 @@ import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { getSessions } from "@/lib/chatService";
+import { supabase } from "@/lib/supabaseClient";
 
+type SessionPreview = {
+  session_id: string;
+  first_message: string;
+  created_at: string;
+};
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
@@ -217,6 +224,73 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
 
+  const [sessions, setSessions] = useState<SessionPreview[]>([]);
+
+  // fetch initial sessions
+  const fetchSessions = async () => {
+    const { data, error } = await supabase
+      .from("chat_messages")
+      .select("id, session_id, message, created_at")
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching sessions:", error.message);
+      return;
+    }
+
+    if (data) {
+      // group by session_id, ambil message pertama
+      const sessionMap: Record<string, SessionPreview> = {};
+      for (const msg of data) {
+        if (!sessionMap[msg.session_id]) {
+          sessionMap[msg.session_id] = {
+            session_id: msg.session_id,
+            first_message: msg.message,
+            created_at: msg.created_at,
+          };
+        }
+      }
+      setSessions(Object.values(sessionMap));
+    }
+  };
+
+  useEffect(() => {
+    fetchSessions();
+
+    // subscribe ke insert baru
+    const channel = supabase
+      .channel("sessions-listener")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+        },
+        (payload) => {
+          const newMsg = payload.new;
+          // cek apakah session_id sudah ada di state
+          setSessions((prev) => {
+            const exists = prev.find((s) => s.session_id === newMsg.session_id);
+            if (exists) return prev; // kalau sudah ada, biarin
+            return [
+              ...prev,
+              {
+                session_id: newMsg.session_id,
+                first_message: newMsg.message,
+                created_at: newMsg.created_at,
+              },
+            ];
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
@@ -288,16 +362,32 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   {group.name}
                 </h3>
 
-                <ul className="mb-6 flex flex-col gap-1.5 ">
-                  {group.menuItems.map((menuItem, menuIndex) => (
-                    <SidebarItem
-                      key={menuIndex}
-                      item={menuItem}
-                      pageName={pageName}
-                      setPageName={setPageName}
-                    />
+                {/* <ul className="mb-6 flex flex-col gap-1.5 ">
+                  {sessions.map((s) => (
+                    <li key={s.session_id}>
+                      <Link
+                        href={`/chat/${s.session_id}`}
+                        className="block rounded p-2 hover:bg-gray-200"
+                      >
+                        {s.first_message.slice(0, 30)}...
+                      </Link>
+                    </li>
                   ))}
-                </ul>
+                </ul> */}
+                <ul className="mb-6 flex flex-col gap-1.5">
+  {sessions.map((s) => (
+    <SidebarItem
+      key={s.session_id}
+      item={{
+        route: `/chat/${s.session_id}`,
+        label: s.first_message,
+      }}
+      pageName={pageName}
+      setPageName={setPageName}
+    />
+  ))}
+</ul>
+
               </div>
             ))}
           </nav>

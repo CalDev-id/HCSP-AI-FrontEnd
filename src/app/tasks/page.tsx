@@ -10,6 +10,7 @@ const CabangPage = () => {
     { opened: "Opened 3 times", taskTitle: "Mutasi Antar Divisi" },
     { opened: "Opened 7 times", taskTitle: "Job Vacancy Internal" },
     { opened: "Opened 2 times", taskTitle: "Learning Recommendation" },
+    { opened: "Opened 4 times", taskTitle: "Create DJM" }
   ];
 
   return (
