@@ -210,7 +210,6 @@
 
 // export default TaskDetailPage;
 
-
 // "use client";
 
 // import { useState } from "react";
@@ -357,6 +356,7 @@
 //     </DefaultLayout>
 //   );
 // }
+
 "use client";
 
 import { useState, useRef } from "react";
@@ -368,29 +368,33 @@ interface FileLinks {
 }
 
 export default function DJMPage() {
-  const [file, setFile] = useState<File | null>(null);
+  const [filePR, setFilePR] = useState<File | null>(null);
+  const [fileTemplate, setFileTemplate] = useState<File | null>(null);
   const [files, setFiles] = useState<FileLinks>({});
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"success" | "error" | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const filePRInputRef = useRef<HTMLInputElement | null>(null);
+  const fileTemplateInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return;
+    if (!filePR || !fileTemplate) return;
 
     const formData = new FormData();
-    formData.append("data", file);
+    formData.append("pr_file", filePR);
+    formData.append("template_file", fileTemplate);
 
     setLoading(true);
     setStatus(null);
     try {
       const res = await fetch(
-        "https://presently-welcome-alien.ngrok-free.app/webhook-test/create-djm",
+        // "https://presently-welcome-alien.ngrok-free.app/webhook-test/create-djm",
+        "https://porpoise-cool-wren.ngrok-free.app/webhook-test/create-djm-2.0",
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
       if (!res.ok) throw new Error("Upload failed");
@@ -406,6 +410,51 @@ export default function DJMPage() {
     }
   };
 
+  const Dropzone = ({
+    label,
+    file,
+    setFile,
+    fileInputRef,
+    accept,
+  }: {
+    label: string;
+    file: File | null;
+    setFile: (file: File | null) => void;
+    fileInputRef: React.RefObject<HTMLInputElement>;
+    accept: string;
+  }) => (
+    <div
+      className="flex w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-400 bg-gray-50 p-8 text-center transition hover:bg-gray-100"
+      onClick={() => fileInputRef.current?.click()}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          setFile(e.dataTransfer.files[0]);
+        }
+      }}
+    >
+      <Upload className="mb-3 h-10 w-10 text-gray-400" />
+      <p className="mb-2 font-semibold">{label}</p>
+      {file ? (
+        <p className="font-medium text-green-600">{file.name}</p>
+      ) : (
+        <div className="text-gray-500">
+          <p className="font-medium">Drag and drop here</p>
+          <p className="text-sm">or</p>
+          <p className="text-blue-600 underline">browse</p>
+        </div>
+      )}
+      <input
+        type="file"
+        accept={accept}
+        ref={fileInputRef}
+        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        className="hidden"
+      />
+    </div>
+  );
+
   return (
     <DefaultLayout>
       <div className="min-h-screen p-6">
@@ -417,63 +466,59 @@ export default function DJMPage() {
             ✅ <span>Upload berhasil!</span>
           </div>
         )}
-
         {status === "error" && (
           <div role="alert" className="alert alert-error mb-4">
             ❌ <span>Upload gagal. Silakan coba lagi.</span>
           </div>
         )}
-        <form onSubmit={handleSubmit} className="mb-6 space-y-4">
-          {/* Drag & Drop Area */}
-          <div
-            className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-400 bg-gray-50 p-10 text-center cursor-pointer hover:bg-gray-100 transition"
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => {
-              e.preventDefault();
-              if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                setFile(e.dataTransfer.files[0]);
-              }
-            }}
+        <p className="mt-2 text-base mb-2 text-gray-500">
+          Belum punya template?{" "}
+          <a
+            href="https://docs.google.com/spreadsheets/d/1u8_HUdsGB5ZQJ4IP1drr3asycF5gf0ccbIoZOVWKWAM/export?format=xlsx&id=1u8_HUdsGB5ZQJ4IP1drr3asycF5gf0ccbIoZOVWKWAM"
+            className="text-blue-600 underline"
           >
-            <Upload className="w-12 h-12 text-gray-400 mb-3" />
-            {file ? (
-              <p className="text-green-600 font-medium">{file.name}</p>
-            ) : (
-              <div className="text-gray-500">
-                <p className="font-medium">Drag and drop here</p>
-                <p className="text-sm">or</p>
-                <p className="text-blue-600 underline">browse</p>
-              </div>
-            )}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="hidden"
+            Download disini
+          </a>
+        </p>
+
+        <form onSubmit={handleSubmit} className="mb-6 space-y-4">
+          {/* 2 Dropzone Side by Side */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <Dropzone
+              label="Upload PR (PDF)"
+              file={filePR}
+              setFile={setFilePR}
+              fileInputRef={filePRInputRef}
+              accept=".pdf"
+            />
+            <Dropzone
+              label="Upload Template DJM (Excel)"
+              file={fileTemplate}
+              setFile={setFileTemplate}
+              fileInputRef={fileTemplateInputRef}
+              accept=".xlsx,.xls"
             />
           </div>
 
           <button
             type="submit"
-            disabled={loading || !file}
+            disabled={loading || !filePR || !fileTemplate}
             className="rounded-lg bg-greenPrimary px-6 py-2 text-white disabled:opacity-50"
           >
             {loading ? "Processing..." : "Upload"}
           </button>
         </form>
 
-        {/* Skeleton saat menunggu response */}
+        {/* Skeleton */}
         {loading && (
           <div className="animate-pulse">
-            <div className="skeleton h-16 w-full mb-5 bg-slate-200 rounded-lg"></div>
-            <div className="skeleton h-16 w-full mb-5 bg-slate-200 rounded-lg"></div>
-            <div className="skeleton h-16 w-full mb-5 bg-slate-200 rounded-lg"></div>
-            <div className="skeleton h-16 w-full mb-5 bg-slate-200 rounded-lg"></div>
+            <div className="mb-5 h-16 w-full rounded-lg bg-slate-200"></div>
+            <div className="mb-5 h-16 w-full rounded-lg bg-slate-200"></div>
+            <div className="mb-5 h-16 w-full rounded-lg bg-slate-200"></div>
           </div>
         )}
 
-        {/* Daftar file muncul hanya kalau ada hasil */}
+        {/* Daftar file hasil */}
         {!loading && Object.keys(files).length > 0 && (
           <div>
             <h2 className="mb-3 text-lg font-semibold">Generated Files</h2>
