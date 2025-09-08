@@ -10,14 +10,14 @@ const CabangPage = () => {
     { opened: "Opened 3 times", taskTitle: "Mutasi Antar Divisi" },
     { opened: "Opened 7 times", taskTitle: "Job Vacancy Internal" },
     { opened: "Opened 2 times", taskTitle: "Learning Recommendation" },
-    { opened: "Opened 4 times", taskTitle: "Create DJM" }
+    { opened: "Opened 4 times", taskTitle: "Create DJM" },
   ];
 
   return (
     <DefaultLayout>
       {/* <TableFive /> */}
-      <div className="flex w-full flex-col lg:flex-row h-screen">
-        <section className="w-full pr-50">
+      <div className="flex h-screen w-full flex-col lg:flex-row">
+        <section className="w-[60%]">
           <h2 className="text-2xl font-bold text-black">Browse Tasks</h2>
           <p className="text-black">
             Discover and create premade tasks that combine multiple instructions
@@ -46,7 +46,6 @@ const CabangPage = () => {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {tasks.map((task, index) => (
-              
               <CardTasks
                 key={index}
                 opened={task.opened}
@@ -55,9 +54,9 @@ const CabangPage = () => {
             ))}
           </div>
         </section>
-        <div className="flex items-center justify-center h-1/2">
-          <div className="w-96">
-            <p className="bg-greenSecondary text-greenPrimary w-fit rounded-2xl p-2 px-8 font-semibold">
+        <div className="flex flex-col w-[40%] h-[80%] items-center justify-center">
+          <div className="items-start">
+            <p className="w-fit rounded-2xl bg-greenSecondary p-2 px-8 font-semibold text-greenPrimary">
               All Tasks
             </p>
             <p className="rounded-2xl p-2 px-8 ">Created by me</p>
@@ -65,45 +64,54 @@ const CabangPage = () => {
             {/* <p className="w-fit rounded-full border border-slate-400 p-2 px-4 font-semibold">
               + Create Tasks
             </p> */}
-            <div className="w-fit">
-  {/* Tombol + Create Tasks */}
-  <label
-    htmlFor="modal_create_task"
-    className="w-fit cursor-pointer rounded-full border border-slate-400 p-2 px-4 font-semibold"
-  >
-    + Create Tasks
-  </label>
+            <div className="w-fit mb-5">
+              {/* Tombol + Create Tasks */}
+              <label
+                htmlFor="modal_create_task"
+                className="w-fit cursor-pointer rounded-full border border-slate-400 p-2 px-4 font-semibold"
+              >
+                + Create Tasks
+              </label>
 
-  {/* Modal */}
-  <input type="checkbox" id="modal_create_task" className="modal-toggle" />
-  <div className="modal" role="dialog">
-    <div className="modal-box rounded-xl border border-slate-400">
-      <h3 className="text-lg font-bold">Create New Task</h3>
+              {/* Modal */}
+              <input
+                type="checkbox"
+                id="modal_create_task"
+                className="modal-toggle"
+              />
+              <div className="modal" role="dialog">
+                <div className="modal-box rounded-xl border border-slate-400">
+                  <h3 className="text-lg font-bold">Create New Task</h3>
 
-      <p className="py-4">Editable Fields</p>
-      <p>Instruction</p>
-      <textarea className="textarea" placeholder="Instruksi"></textarea>
+                  <p className="py-4">Editable Fields</p>
+                  <p>Instruction</p>
+                  <textarea
+                    className="textarea"
+                    placeholder="Instruksi"
+                  ></textarea>
 
-      <p>Knowledge</p>
-      <input type="file" className="file-input" />
+                  <p>Knowledge</p>
+                  <input type="file" className="file-input" />
 
-      <div className="flex justify-end mt-4">
-        <button className="btn rounded-full bg-black text-white">Run</button>
-      </div>
-    </div>
-    <label className="modal-backdrop" htmlFor="modal_create_task">
-      Close
-    </label>
-  </div>
-</div>
+                  <div className="mt-4 flex justify-end">
+                    <button className="btn rounded-full bg-black text-white">
+                      Run
+                    </button>
+                  </div>
+                </div>
+                <label className="modal-backdrop" htmlFor="modal_create_task">
+                  Close
+                </label>
+              </div>
+            </div>
 
-            <div className="text-sm text-slate-600 mt-2">
+            <div className="mt-2 text-sm text-slate-600">
               <p className="mt-2">Vacant position & fullfillment status</p>
               <p className="mt-2">Probation Status Overview</p>
               <p className="mt-2">Potential Reassessment</p>
               <p className="mt-2">Talent Tracker</p>
             </div>
-          </div>
+            </div>
         </div>
       </div>
     </DefaultLayout>
