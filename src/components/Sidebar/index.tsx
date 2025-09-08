@@ -375,19 +375,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   ))}
                 </ul> */}
                 <ul className="mb-6 flex flex-col gap-1.5">
-  {sessions.map((s) => (
-    <SidebarItem
-      key={s.session_id}
-      item={{
-        route: `/chat/${s.session_id}`,
-        label: s.first_message,
-      }}
-      pageName={pageName}
-      setPageName={setPageName}
-    />
-  ))}
-</ul>
-
+                  {sessions.map((s) => (
+                    <SidebarItem
+                      key={s.session_id}
+                      item={{
+                        route: `/chat/${s.session_id}`,
+                        label: s.first_message,
+                      }}
+                      pageName={pageName}
+                      setPageName={setPageName}
+                    />
+                  ))}
+                </ul>
               </div>
             ))}
           </nav>

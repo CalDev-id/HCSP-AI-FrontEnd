@@ -447,7 +447,7 @@ useEffect(() => {
 
     try {
       const res = await fetch(
-        "https://swan-intimate-positively.ngrok-free.app/webhook/chat",
+        "https://presently-welcome-alien.ngrok-free.app/webhook/chat",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

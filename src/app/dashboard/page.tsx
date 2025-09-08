@@ -1,312 +1,366 @@
-
-//berhasil 
-
 // "use client";
 
-// import { useEffect, useState } from "react";
+// import { useState } from "react";
 // import DefaultLayout from "@/components/Layouts/DefaultLayout";
-// import ReactMarkdown from "react-markdown";
-// import { supabase } from "@/lib/supabaseClient";
-// import { ChatMessage } from "@/types/chat";
 
-// const HomePage = () => {
+// const DashboardPage = () => {
 //   const [input, setInput] = useState("");
-//   const [messages, setMessages] = useState<ChatMessage[]>([]);
 //   const [loading, setLoading] = useState(false);
+//   const [response, setResponse] = useState<{ api1?: string; api2?: string }>({});
 
-//   const sessionId = "session3";
-
-//   // fetch awal history
-//   useEffect(() => {
-//     const fetchHistory = async () => {
-//       const { data, error } = await supabase
-//         .from("chat_messages")
-//         .select("*")
-//         .eq("session_id", sessionId)
-//         .order("id", { ascending: true });
-
-//       if (!error && data) {
-//         setMessages(data as ChatMessage[]);
-//       }
-//     };
-
-//     fetchHistory();
-
-//     // subscribe realtime
-//     const channel = supabase
-//       .channel("chat-room")
-//       .on(
-//         "postgres_changes",
-//         { event: "INSERT", schema: "public", table: "chat_messages" },
-//         (payload) => {
-//           const newMsg = payload.new as ChatMessage;
-//           if (newMsg.session_id === sessionId) {
-//             setMessages((prev) => [...prev, newMsg]);
-//           }
-//         }
-//       )
-//       .subscribe();
-
-//     return () => {
-//       supabase.removeChannel(channel);
-//     };
-//   }, [sessionId]);
-
-// const sendMessage = async () => {
-//   if (!input.trim()) return;
-
-//   setLoading(true);
-//   const userText = input;
-//   setInput("");
-
-//   try {
-//     // 1. Hit API — API akan tulis userMessage + botReply ke Supabase
-//     const res = await fetch(
-//       "https://swan-intimate-positively.ngrok-free.app/webhook/create-djm",
-//       {
+//   const fetchApi = async (url: string, key: "api1" | "api2") => {
+//     try {
+//       const res = await fetch(url, {
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({
-//           sessionId,
-//           prompt: userText,
-//         }),
+//         body: JSON.stringify({ prompt: input }),
+//       });
+
+//       const text = await res.text();
+//       let parsed: any;
+//       try {
+//         parsed = JSON.parse(text);
+//       } catch {
+//         parsed = text;
 //       }
+
+//       // pastikan hasilnya string supaya bisa dirender
+//       const safeResult =
+//         typeof parsed === "object" ? JSON.stringify(parsed) : parsed;
+
+//       setResponse((prev) => ({
+//         ...prev,
+//         [key]: safeResult,
+//       }));
+//     } catch (error) {
+//       console.error(`Error fetching ${key}:`, error);
+//       setResponse((prev) => ({
+//         ...prev,
+//         [key]: `Error fetching ${key.toUpperCase()}`,
+//       }));
+//     }
+//   };
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!input.trim()) return;
+
+//     setLoading(true);
+//     setResponse({});
+
+//     fetchApi(
+//       "https://swan-intimate-positively.ngrok-free.app/webhook/api1",
+//       "api1"
+//     );
+//     fetchApi(
+//       "https://swan-intimate-positively.ngrok-free.app/webhook/api2",
+//       "api2"
 //     );
 
-//     await res.json(); // response ga dipakai langsung
-//     // 2. Chat baru otomatis muncul via Realtime subscription
-//   } catch (err) {
-//     console.error("API error:", err);
-//     // kalau mau bisa kasih notifikasi error di UI aja
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-
-//   const handleKeyDown = (e: React.KeyboardEvent) => {
-//     if (e.key === "Enter" && !e.shiftKey) {
-//       e.preventDefault();
-//       sendMessage();
-//     }
+//     setTimeout(() => setLoading(false), 2000);
 //   };
 
 //   return (
 //     <DefaultLayout>
-//       <div className="flex min-h-screen w-full flex-col items-center justify-center space-y-4 px-4 py-8">
-//         {messages.length === 0 ? (
-//           <>
-//             <div className="flex items-center space-x-2">
-//               <h1 className="text-3xl font-extrabold text-gray-900">HCSP-AI</h1>
-//               <svg
-//                 width="20"
-//                 height="20"
-//                 viewBox="0 0 24 24"
-//                 fill="none"
-//                 xmlns="http://www.w3.org/2000/svg"
-//               >
-//                 <path
-//                   d="M5 12L12 5L19 12"
-//                   stroke="#22C55E"
-//                   strokeWidth="2"
-//                   strokeLinecap="round"
-//                   strokeLinejoin="round"
-//                 />
-//                 <path
-//                   d="M12 19V5"
-//                   stroke="#22C55E"
-//                   strokeWidth="2"
-//                   strokeLinecap="round"
-//                   strokeLinejoin="round"
-//                 />
-//               </svg>
-//             </div>
-//             <p className="max-w-md text-center text-base text-gray-600">
-//               Welcome to HCSP-AI! Access insights to enhance decisions and build
-//               teams.
-//             </p>
-//           </>
-//         ) : (
-//           <div className="flex w-full max-w-2xl flex-col space-y-2">
-//             {messages.map((msg) => (
-//               <div
-//                 key={msg.id}
-//                 className={`flex ${
-//                   msg.sender === "user" ? "justify-end" : "justify-start"
-//                 }`}
-//               >
-//                 <div
-//                   className={`max-w-full break-words rounded-xl px-4 py-2 text-sm ${
-//                     msg.sender === "user"
-//                       ? "bg-green-500 text-white"
-//                       : "bg-gray-100 text-gray-800"
-//                   }`}
-//                   style={{ whiteSpace: "pre-wrap" }}
-//                 >
-//                   <ReactMarkdown>{msg.message}</ReactMarkdown>
-//                 </div>
-//               </div>
-//             ))}
-//             {loading && (
-//               <div className="flex justify-start">
-//                 <div className="animate-pulse rounded-xl bg-gray-100 px-4 py-2 text-sm text-gray-500">
-//                   HCSP-AI sedang mengetik...
-//                 </div>
-//               </div>
-//             )}
-//           </div>
-//         )}
+//       <div className="p-4">
+//         <h1 className="text-xl font-bold mb-4">Chatbot</h1>
+//         <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+//           <input
+//             type="text"
+//             value={input}
+//             onChange={(e) => setInput(e.target.value)}
+//             placeholder="Tulis pesan..."
+//             className="border p-2 flex-1 rounded"
+//           />
+//           <button
+//             type="submit"
+//             disabled={loading}
+//             className="bg-blue-500 text-white px-4 py-2 rounded"
+//           >
+//             {loading ? "Loading..." : "Kirim"}
+//           </button>
+//         </form>
 
-//         {/* Input */}
-//         <div className="w-full max-w-2xl mt-4 fixed bottom-40 bg-white rounded-xl">
-//           <div className="flex items-center rounded-xl border border-gray-300 p-4 shadow-sm">
-//             <input
-//               type="text"
-//               placeholder="Ask HCSP-AI anything"
-//               value={input}
-//               onChange={(e) => setInput(e.target.value)}
-//               onKeyDown={handleKeyDown}
-//               className="flex-grow bg-transparent text-gray-800 placeholder-gray-400 outline-none"
-//             />
-//             <button
-//               onClick={sendMessage}
-//               disabled={loading}
-//               className="rounded-full bg-green-500 p-2 text-white transition hover:bg-green-600 disabled:opacity-50"
-//             >
-//               <svg
-//                 className="h-5 w-5"
-//                 fill="none"
-//                 stroke="currentColor"
-//                 strokeWidth="2"
-//                 viewBox="0 0 24 24"
-//                 xmlns="http://www.w3.org/2000/svg"
-//               >
-//                 <path
-//                   strokeLinecap="round"
-//                   strokeLinejoin="round"
-//                   d="M5 12h14m0 0l-6-6m6 6l-6 6"
-//                 />
-//               </svg>
-//             </button>
-//           </div>
+//         <div className="space-y-2">
+//           {response.api1 && (
+//             <div className="p-2 border rounded">
+//               <strong>API1:</strong> {response.api1}
+//             </div>
+//           )}
+//           {response.api2 && (
+//             <div className="p-2 border rounded">
+//               <strong>API2:</strong> {response.api2}
+//             </div>
+//           )}
 //         </div>
 //       </div>
 //     </DefaultLayout>
 //   );
 // };
 
-// export default HomePage;
+// export default DashboardPage;
 
 
-import CardDataStats from "@/components/CardDataStats";
-import ChartOne from "@/components/Charts/ChartOne";
-import ChartThree from "@/components/Charts/ChartThree";
-import ChartTwo from "@/components/Charts/ChartTwo";
-import ChatCard from "@/components/Chat/ChatCard";
+
+
+
+
+
+
+
+
+
+
+// "use client";
+
+// import { useState } from "react";
+// import DefaultLayout from "@/components/Layouts/DefaultLayout";
+
+// interface FileLinks {
+//   [key: string]: string;
+// }
+
+// export default function DJMPage() {
+//   const [file, setFile] = useState<File | null>(null);
+//   const [files, setFiles] = useState<FileLinks>({});
+//   const [loading, setLoading] = useState(false);
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!file) return;
+
+//     const formData = new FormData();
+//     formData.append("data", file); // key harus sama dengan di n8n webhook
+
+//     setLoading(true);
+//     try {
+//       const res = await fetch(
+//         "https://presently-welcome-alien.ngrok-free.app/webhook-test/create-djm",
+//         {
+//           method: "POST",
+//           body: formData,
+//         },
+//       );
+
+//       if (!res.ok) throw new Error("Upload failed");
+
+//       const data = await res.json();
+//       setFiles(data);
+//     } catch (err) {
+//       console.error("Error uploading:", err);
+//       alert("Upload gagal");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <DefaultLayout>
+//       <div className="p-6">
+//         <h1 className="mb-4 text-xl font-bold">Upload File DJM</h1>
+
+//         <form onSubmit={handleSubmit} className="mb-6 space-y-3">
+//           {/* <input
+//             type="file"
+//             onChange={(e) => setFile(e.target.files?.[0] || null)}
+//             className="block"
+//           /> */}
+//           <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="file-input" />
+//           <button
+//             type="submit"
+//             disabled={loading}
+//             className="rounded-lg bg-greenPrimary px-4 py-2 text-white disabled:opacity-50 ml-5"
+//           >
+//             {loading ? "Processing..." : "Upload"}
+//           </button>
+//         </form>
+
+//         {Object.keys(files).length > 0 && (
+//           <div>
+//             <h2 className="mb-3 text-lg font-semibold">Generated Files</h2>
+//             <ul className="space-y-3">
+//               {Object.entries(files).map(([name, url]) => (
+//                 <li
+//                   key={name}
+//                   className="flex items-center justify-between rounded-lg bg-gray-100 p-3 shadow"
+//                 >
+//                   <span>{name}</span>
+//                   <button
+//                     onClick={async () => {
+//                       try {
+//                         const response = await fetch(url);
+//                         const blob = await response.blob();
+//                         const blobUrl = window.URL.createObjectURL(blob);
+
+//                         const a = document.createElement("a");
+//                         a.href = blobUrl;
+//                         a.download = `${name}.xlsx`; // nama file download
+//                         document.body.appendChild(a);
+//                         a.click();
+//                         a.remove();
+//                         window.URL.revokeObjectURL(blobUrl);
+//                       } catch (err) {
+//                         console.error("Download failed", err);
+//                       }
+//                     }}
+//                     className="rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
+//                   >
+//                     Download
+//                   </button>
+//                 </li>
+//               ))}
+//             </ul>
+//           </div>
+//         )}
+//       </div>
+//     </DefaultLayout>
+//   );
+// }
+
+
+"use client";
+
+import { useState } from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import MapOne from "@/components/Maps/MapOne";
-import TableOne from "@/components/Tables/TableOne";
 
+interface FileLinks {
+  [key: string]: string;
+}
 
-const DashboardPage = () => {
+export default function DJMPage() {
+  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<FileLinks>({});
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<"success" | "error" | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("data", file);
+
+    setLoading(true);
+    setStatus(null);
+    try {
+      const res = await fetch(
+        "https://presently-welcome-alien.ngrok-free.app/webhook-test/create-djm",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      setFiles(data);
+      setStatus("success");
+    } catch (err) {
+      console.error("Error uploading:", err);
+      setStatus("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <DefaultLayout>
-      {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="Total Mentors" total="25" rate="0.43%" levelUp>
-          <svg
-            className="fill-primary dark:fill-white"
-            width="22"
-            height="16"
-            viewBox="0 0 22 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M11 15.1156C4.19376 15.1156 0.825012 8.61876 0.687512 8.34376C0.584387 8.13751 0.584387 7.86251 0.687512 7.65626C0.825012 7.38126 4.19376 0.918762 11 0.918762C17.8063 0.918762 21.175 7.38126 21.3125 7.65626C21.4156 7.86251 21.4156 8.13751 21.3125 8.34376C21.175 8.61876 17.8063 15.1156 11 15.1156ZM2.26876 8.00001C3.02501 9.27189 5.98126 13.5688 11 13.5688C16.0188 13.5688 18.975 9.27189 19.7313 8.00001C18.975 6.72814 16.0188 2.43126 11 2.43126C5.98126 2.43126 3.02501 6.72814 2.26876 8.00001Z"
-              fill=""
-            />
-            <path
-              d="M11 10.9219C9.38438 10.9219 8.07812 9.61562 8.07812 8C8.07812 6.38438 9.38438 5.07812 11 5.07812C12.6156 5.07812 13.9219 6.38438 13.9219 8C13.9219 9.61562 12.6156 10.9219 11 10.9219ZM11 6.625C10.2437 6.625 9.625 7.24375 9.625 8C9.625 8.75625 10.2437 9.375 11 9.375C11.7563 9.375 12.375 8.75625 12.375 8C12.375 7.24375 11.7563 6.625 11 6.625Z"
-              fill=""
-            />
-          </svg>
-        </CardDataStats>
-        <CardDataStats title="Total Profit" total="Rp. 4.250.000" rate="4.35%" levelUp>
-          <svg
-            className="fill-primary dark:fill-white"
-            width="20"
-            height="22"
-            viewBox="0 0 20 22"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M11.7531 16.4312C10.3781 16.4312 9.27808 17.5312 9.27808 18.9062C9.27808 20.2812 10.3781 21.3812 11.7531 21.3812C13.1281 21.3812 14.2281 20.2812 14.2281 18.9062C14.2281 17.5656 13.0937 16.4312 11.7531 16.4312ZM11.7531 19.8687C11.2375 19.8687 10.825 19.4562 10.825 18.9406C10.825 18.425 11.2375 18.0125 11.7531 18.0125C12.2687 18.0125 12.6812 18.425 12.6812 18.9406C12.6812 19.4219 12.2343 19.8687 11.7531 19.8687Z"
-              fill=""
-            />
-            <path
-              d="M5.22183 16.4312C3.84683 16.4312 2.74683 17.5312 2.74683 18.9062C2.74683 20.2812 3.84683 21.3812 5.22183 21.3812C6.59683 21.3812 7.69683 20.2812 7.69683 18.9062C7.69683 17.5656 6.56245 16.4312 5.22183 16.4312ZM5.22183 19.8687C4.7062 19.8687 4.2937 19.4562 4.2937 18.9406C4.2937 18.425 4.7062 18.0125 5.22183 18.0125C5.73745 18.0125 6.14995 18.425 6.14995 18.9406C6.14995 19.4219 5.73745 19.8687 5.22183 19.8687Z"
-              fill=""
-            />
-            <path
-              d="M19.0062 0.618744H17.15C16.325 0.618744 15.6031 1.23749 15.5 2.06249L14.95 6.01562H1.37185C1.0281 6.01562 0.684353 6.18749 0.443728 6.46249C0.237478 6.73749 0.134353 7.11562 0.237478 7.45937C0.237478 7.49374 0.237478 7.49374 0.237478 7.52812L2.36873 13.9562C2.50623 14.4375 2.9531 14.7812 3.46873 14.7812H12.9562C14.2281 14.7812 15.3281 13.8187 15.5 12.5469L16.9437 2.26874C16.9437 2.19999 17.0125 2.16562 17.0812 2.16562H18.9375C19.35 2.16562 19.7281 1.82187 19.7281 1.37499C19.7281 0.928119 19.4187 0.618744 19.0062 0.618744ZM14.0219 12.3062C13.9531 12.8219 13.5062 13.2 12.9906 13.2H3.7781L1.92185 7.56249H14.7094L14.0219 12.3062Z"
-              fill=""
-            />
-          </svg>
-        </CardDataStats>
-        <CardDataStats title="Total Outcome" total="Rp. 2.450.000" rate="2.59%" levelUp>
-          <svg
-            className="fill-primary dark:fill-white"
-            width="22"
-            height="22"
-            viewBox="0 0 22 22"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M21.1063 18.0469L19.3875 3.23126C19.2157 1.71876 17.9438 0.584381 16.3969 0.584381H5.56878C4.05628 0.584381 2.78441 1.71876 2.57816 3.23126L0.859406 18.0469C0.756281 18.9063 1.03128 19.7313 1.61566 20.3844C2.20003 21.0375 2.99066 21.3813 3.85003 21.3813H18.1157C18.975 21.3813 19.8 21.0031 20.35 20.3844C20.9 19.7656 21.2094 18.9063 21.1063 18.0469ZM19.2157 19.3531C18.9407 19.6625 18.5625 19.8344 18.15 19.8344H3.85003C3.43753 19.8344 3.05941 19.6625 2.78441 19.3531C2.50941 19.0438 2.37191 18.6313 2.44066 18.2188L4.12503 3.43751C4.19378 2.71563 4.81253 2.16563 5.56878 2.16563H16.4313C17.1532 2.16563 17.7719 2.71563 17.875 3.43751L19.5938 18.2531C19.6282 18.6656 19.4907 19.0438 19.2157 19.3531Z"
-              fill=""
-            />
-            <path
-              d="M14.3345 5.29375C13.922 5.39688 13.647 5.80938 13.7501 6.22188C13.7845 6.42813 13.8189 6.63438 13.8189 6.80625C13.8189 8.35313 12.547 9.625 11.0001 9.625C9.45327 9.625 8.1814 8.35313 8.1814 6.80625C8.1814 6.6 8.21577 6.42813 8.25015 6.22188C8.35327 5.80938 8.07827 5.39688 7.66577 5.29375C7.25327 5.19063 6.84077 5.46563 6.73765 5.87813C6.6689 6.1875 6.63452 6.49688 6.63452 6.80625C6.63452 9.2125 8.5939 11.1719 11.0001 11.1719C13.4064 11.1719 15.3658 9.2125 15.3658 6.80625C15.3658 6.49688 15.3314 6.1875 15.2626 5.87813C15.1595 5.46563 14.747 5.225 14.3345 5.29375Z"
-              fill=""
-            />
-          </svg>
-        </CardDataStats>
-        <CardDataStats title="Total Students" total="456" rate="0.95%" levelDown>
-          <svg
-            className="fill-primary dark:fill-white"
-            width="22"
-            height="18"
-            viewBox="0 0 22 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M7.18418 8.03751C9.31543 8.03751 11.0686 6.35313 11.0686 4.25626C11.0686 2.15938 9.31543 0.475006 7.18418 0.475006C5.05293 0.475006 3.2998 2.15938 3.2998 4.25626C3.2998 6.35313 5.05293 8.03751 7.18418 8.03751ZM7.18418 2.05626C8.45605 2.05626 9.52168 3.05313 9.52168 4.29063C9.52168 5.52813 8.49043 6.52501 7.18418 6.52501C5.87793 6.52501 4.84668 5.52813 4.84668 4.29063C4.84668 3.05313 5.9123 2.05626 7.18418 2.05626Z"
-              fill=""
-            />
-            <path
-              d="M15.8124 9.6875C17.6687 9.6875 19.1468 8.24375 19.1468 6.42188C19.1468 4.6 17.6343 3.15625 15.8124 3.15625C13.9905 3.15625 12.478 4.6 12.478 6.42188C12.478 8.24375 13.9905 9.6875 15.8124 9.6875ZM15.8124 4.7375C16.8093 4.7375 17.5999 5.49375 17.5999 6.45625C17.5999 7.41875 16.8093 8.175 15.8124 8.175C14.8155 8.175 14.0249 7.41875 14.0249 6.45625C14.0249 5.49375 14.8155 4.7375 15.8124 4.7375Z"
-              fill=""
-            />
-            <path
-              d="M15.9843 10.0313H15.6749C14.6437 10.0313 13.6468 10.3406 12.7874 10.8563C11.8593 9.61876 10.3812 8.79376 8.73115 8.79376H5.67178C2.85303 8.82814 0.618652 11.0625 0.618652 13.8469V16.3219C0.618652 16.975 1.13428 17.4906 1.7874 17.4906H20.2468C20.8999 17.4906 21.4499 16.9406 21.4499 16.2875V15.4625C21.4155 12.4719 18.9749 10.0313 15.9843 10.0313ZM2.16553 15.9438V13.8469C2.16553 11.9219 3.74678 10.3406 5.67178 10.3406H8.73115C10.6562 10.3406 12.2374 11.9219 12.2374 13.8469V15.9438H2.16553V15.9438ZM19.8687 15.9438H13.7499V13.8469C13.7499 13.2969 13.6468 12.7469 13.4749 12.2313C14.0937 11.7844 14.8499 11.5781 15.6405 11.5781H15.9499C18.0812 11.5781 19.8343 13.3313 19.8343 15.4625V15.9438H19.8687Z"
-              fill=""
-            />
-          </svg>
-        </CardDataStats>
-      </div>
+      <div className="min-h-screen p-6">
+        <h1 className="mb-4 text-xl font-bold">Upload File DJM</h1>
 
-      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-        <div className="col-span-12 xl:col-span-8">
-          <TableOne />
-        </div>
-        <ChatCard />
-      </div> */}
-      Dashboard
+        {/* ALERT */}
+        {status === "success" && (
+          <div role="alert" className="alert alert-success mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Upload berhasil!</span>
+          </div>
+        )}
+
+        {status === "error" && (
+          <div role="alert" className="alert alert-error mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Upload gagal. Silakan coba lagi.</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="mb-6 space-y-3">
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="file-input"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded-lg bg-greenPrimary px-4 py-2 text-white disabled:opacity-50 ml-5"
+          >
+            {loading ? "Processing..." : "Upload"}
+          </button>
+        </form>
+
+        {Object.keys(files).length > 0 && (
+          <div>
+            <h2 className="mb-3 text-lg font-semibold">Generated Files</h2>
+            <ul className="space-y-3">
+              {Object.entries(files).map(([name, url]) => (
+                <li
+                  key={name}
+                  className="flex items-center justify-between rounded-lg bg-gray-100 p-3 shadow"
+                >
+                  <span>{name}</span>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(url);
+                        const blob = await response.blob();
+                        const blobUrl = window.URL.createObjectURL(blob);
+
+                        const a = document.createElement("a");
+                        a.href = blobUrl;
+                        a.download = `${name}.xlsx`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(blobUrl);
+                      } catch (err) {
+                        console.error("Download failed", err);
+                      }
+                    }}
+                    className="rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
+                  >
+                    Download
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </DefaultLayout>
   );
-};
-
-export default DashboardPage;
+}
