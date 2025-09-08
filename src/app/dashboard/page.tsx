@@ -218,149 +218,170 @@
 // }
 
 
-"use client";
+// "use client";
 
-import { useState } from "react";
+// import { useState } from "react";
+// import DefaultLayout from "@/components/Layouts/DefaultLayout";
+
+// interface FileLinks {
+//   [key: string]: string;
+// }
+
+// export default function DJMPage() {
+//   const [file, setFile] = useState<File | null>(null);
+//   const [files, setFiles] = useState<FileLinks>({});
+//   const [loading, setLoading] = useState(false);
+//   const [status, setStatus] = useState<"success" | "error" | null>(null);
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!file) return;
+
+//     const formData = new FormData();
+//     formData.append("data", file);
+
+//     setLoading(true);
+//     setStatus(null);
+//     try {
+//       const res = await fetch(
+//         "https://presently-welcome-alien.ngrok-free.app/webhook-test/create-djm",
+//         {
+//           method: "POST",
+//           body: formData,
+//         }
+//       );
+
+//       if (!res.ok) throw new Error("Upload failed");
+
+//       const data = await res.json();
+//       setFiles(data);
+//       setStatus("success");
+//     } catch (err) {
+//       console.error("Error uploading:", err);
+//       setStatus("error");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <DefaultLayout>
+//       <div className="min-h-screen p-6">
+//         <h1 className="mb-4 text-xl font-bold">Upload File DJM</h1>
+
+//         {/* ALERT */}
+//         {status === "success" && (
+//           <div role="alert" className="alert alert-success mb-4">
+//             <svg
+//               xmlns="http://www.w3.org/2000/svg"
+//               className="h-6 w-6 shrink-0 stroke-current"
+//               fill="none"
+//               viewBox="0 0 24 24"
+//             >
+//               <path
+//                 strokeLinecap="round"
+//                 strokeLinejoin="round"
+//                 strokeWidth="2"
+//                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+//               />
+//             </svg>
+//             <span>Upload berhasil!</span>
+//           </div>
+//         )}
+
+//         {status === "error" && (
+//           <div role="alert" className="alert alert-error mb-4">
+//             <svg
+//               xmlns="http://www.w3.org/2000/svg"
+//               className="h-6 w-6 shrink-0 stroke-current"
+//               fill="none"
+//               viewBox="0 0 24 24"
+//             >
+//               <path
+//                 strokeLinecap="round"
+//                 strokeLinejoin="round"
+//                 strokeWidth="2"
+//                 d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+//               />
+//             </svg>
+//             <span>Upload gagal. Silakan coba lagi.</span>
+//           </div>
+//         )}
+
+//         <form onSubmit={handleSubmit} className="mb-6 space-y-3">
+//           <input
+//             type="file"
+//             onChange={(e) => setFile(e.target.files?.[0] || null)}
+//             className="file-input"
+//           />
+//           <button
+//             type="submit"
+//             disabled={loading}
+//             className="rounded-lg bg-greenPrimary px-4 py-2 text-white disabled:opacity-50 ml-5"
+//           >
+//             {loading ? "Processing..." : "Upload"}
+//           </button>
+//         </form>
+
+//         {Object.keys(files).length > 0 && (
+//           <div>
+//             <h2 className="mb-3 text-lg font-semibold">Generated Files</h2>
+//             <ul className="space-y-3">
+//               {Object.entries(files).map(([name, url]) => (
+//                 <li
+//                   key={name}
+//                   className="flex items-center justify-between rounded-lg bg-gray-100 p-3 shadow"
+//                 >
+//                   <span>{name}</span>
+//                   <button
+//                     onClick={async () => {
+//                       try {
+//                         const response = await fetch(url);
+//                         const blob = await response.blob();
+//                         const blobUrl = window.URL.createObjectURL(blob);
+
+//                         const a = document.createElement("a");
+//                         a.href = blobUrl;
+//                         a.download = `${name}.xlsx`;
+//                         document.body.appendChild(a);
+//                         a.click();
+//                         a.remove();
+//                         window.URL.revokeObjectURL(blobUrl);
+//                       } catch (err) {
+//                         console.error("Download failed", err);
+//                       }
+//                     }}
+//                     className="rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
+//                   >
+//                     Download
+//                   </button>
+//                 </li>
+//               ))}
+//             </ul>
+//           </div>
+//         )}
+//       </div>
+//     </DefaultLayout>
+//   );
+// }
+
+import Chart from "@/components/Charts/page";
+import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import React from "react";
 
-interface FileLinks {
-  [key: string]: string;
-}
+export const metadata: Metadata = {
+  title: "Next.js Chart | TailAdmin - Next.js Dashboard Template",
+  description:
+    "This is Next.js Chart page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
+};
 
-export default function DJMPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [files, setFiles] = useState<FileLinks>({});
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<"success" | "error" | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("data", file);
-
-    setLoading(true);
-    setStatus(null);
-    try {
-      const res = await fetch(
-        "https://presently-welcome-alien.ngrok-free.app/webhook-test/create-djm",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!res.ok) throw new Error("Upload failed");
-
-      const data = await res.json();
-      setFiles(data);
-      setStatus("success");
-    } catch (err) {
-      console.error("Error uploading:", err);
-      setStatus("error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+const BasicChartPage: React.FC = () => {
   return (
     <DefaultLayout>
-      <div className="min-h-screen p-6">
-        <h1 className="mb-4 text-xl font-bold">Upload File DJM</h1>
-
-        {/* ALERT */}
-        {status === "success" && (
-          <div role="alert" className="alert alert-success mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 shrink-0 stroke-current"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>Upload berhasil!</span>
-          </div>
-        )}
-
-        {status === "error" && (
-          <div role="alert" className="alert alert-error mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 shrink-0 stroke-current"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>Upload gagal. Silakan coba lagi.</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="mb-6 space-y-3">
-          <input
-            type="file"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="file-input"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-lg bg-greenPrimary px-4 py-2 text-white disabled:opacity-50 ml-5"
-          >
-            {loading ? "Processing..." : "Upload"}
-          </button>
-        </form>
-
-        {Object.keys(files).length > 0 && (
-          <div>
-            <h2 className="mb-3 text-lg font-semibold">Generated Files</h2>
-            <ul className="space-y-3">
-              {Object.entries(files).map(([name, url]) => (
-                <li
-                  key={name}
-                  className="flex items-center justify-between rounded-lg bg-gray-100 p-3 shadow"
-                >
-                  <span>{name}</span>
-                  <button
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(url);
-                        const blob = await response.blob();
-                        const blobUrl = window.URL.createObjectURL(blob);
-
-                        const a = document.createElement("a");
-                        a.href = blobUrl;
-                        a.download = `${name}.xlsx`;
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                        window.URL.revokeObjectURL(blobUrl);
-                      } catch (err) {
-                        console.error("Download failed", err);
-                      }
-                    }}
-                    className="rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
-                  >
-                    Download
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+      <Chart />
     </DefaultLayout>
   );
-}
+};
+
+export default BasicChartPage;
