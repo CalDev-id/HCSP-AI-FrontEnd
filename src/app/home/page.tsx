@@ -512,7 +512,7 @@ useEffect(() => {
             </p>
           </>
         ) : (
-          <div className="flex w-full max-w-2xl flex-col space-y-2">
+          <div className="flex w-full max-w-2xl flex-col space-y-2 pb-32">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -543,7 +543,7 @@ useEffect(() => {
         )}
 
         {/* Input */}
-        <div className="w-full max-w-2xl mt-4 fixed bottom-40 bg-white rounded-xl">
+        <div className="w-full max-w-2xl mt-4 fixed bottom-0 bg-white rounded-xl">
           <div className="flex items-center rounded-xl border border-gray-300 p-4 shadow-sm">
             <input
               type="text"
@@ -573,6 +573,9 @@ useEffect(() => {
                 />
               </svg>
             </button>
+          </div>
+          <div className="bg-gray-100 h-20">
+            
           </div>
         </div>
       </div>
