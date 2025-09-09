@@ -31,7 +31,7 @@ export default function DJMPage() {
     try {
       const res = await fetch(
         // "https://presently-welcome-alien.ngrok-free.app/webhook-test/create-djm",
-        "https://porpoise-cool-wren.ngrok-free.app/webhook-test/create-djm-2.0",
+        "https://snipe-hopeful-alien.ngrok-free.app/webhook-test/upload-files",
         {
           method: "POST",
           body: formData,
