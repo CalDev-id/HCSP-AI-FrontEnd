@@ -11,7 +11,7 @@ const CabangPage = () => {
     // { opened: "Opened 2 times", taskTitle: "Learning Recommendation" },
     { opened: "Opened 5 times", taskTitle: "Profile Match Up Promosi" },
     { opened: "Opened 4 times", taskTitle: "Create DJM" },
-
+    { opened: "Opened 10 times", taskTitle: "Cv Screening" },
   ];
 
   return (
