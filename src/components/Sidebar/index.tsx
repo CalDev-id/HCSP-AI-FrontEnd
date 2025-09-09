@@ -224,7 +224,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
 
-  const [sessions, setSessions] = useState<SessionPreview[]>([]);
+const [sessions, setSessions] = useLocalStorage<SessionPreview[]>("chat_sessions", []);
+// const [sessions, setSessions] = useState<SessionPreview[]>([]);
 
   // fetch initial sessions
   const fetchSessions = async () => {
@@ -361,40 +362,26 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 <h3 className="mb-4 ml-4 text-sm font-semibold text-black dark:text-bodydark2">
                   {group.name}
                 </h3>
+                <ul className="mb-6 flex flex-col gap-1.5">
+                  {sessions.map((s) => {
+                    const shortMessage =
+                      s.first_message.length > 20
+                        ? s.first_message.slice(0, 20) + "..."
+                        : s.first_message;
 
-                {/* <ul className="mb-6 flex flex-col gap-1.5 ">
-                  {sessions.map((s) => (
-                    <li key={s.session_id}>
-                      <Link
-                        href={`/chat/${s.session_id}`}
-                        className="block rounded p-2 hover:bg-gray-200"
-                      >
-                        {s.first_message.slice(0, 30)}...
-                      </Link>
-                    </li>
-                  ))}
-                </ul> */}
-<ul className="mb-6 flex flex-col gap-1.5">
-  {sessions.map((s) => {
-    const shortMessage =
-      s.first_message.length > 20
-        ? s.first_message.slice(0, 20) + "..."
-        : s.first_message;
-
-    return (
-      <SidebarItem
-        key={s.session_id}
-        item={{
-          route: `/chat/${s.session_id}`,
-          label: shortMessage,
-        }}
-        pageName={pageName}
-        setPageName={setPageName}
-      />
-    );
-  })}
-</ul>
-
+                    return (
+                      <SidebarItem
+                        key={s.session_id}
+                        item={{
+                          route: `/chat/${s.session_id}`,
+                          label: shortMessage,
+                        }}
+                        pageName={pageName}
+                        setPageName={setPageName}
+                      />
+                    );
+                  })}
+                </ul>
               </div>
             ))}
           </nav>

@@ -1,69 +1,3 @@
-// // app/chat/[sessionId]/page.tsx
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import { useParams } from "next/navigation";
-// import { supabase } from "@/lib/supabaseClient";
-// import type { ChatMessage } from "@/types/chat";
-
-// export default function ChatPage() {
-//   const { sessionId } = useParams();
-//   const [messages, setMessages] = useState<ChatMessage[]>([]);
-
-//   useEffect(() => {
-//     if (!sessionId) return;
-
-//     // Fetch initial messages
-//     const fetchMessages = async () => {
-//       const { data, error } = await supabase
-//         .from("chat_messages")
-//         .select("*")
-//         .eq("session_id", sessionId)
-//         .order("id", { ascending: true });
-
-//       if (!error && data) setMessages(data as ChatMessage[]);
-//     };
-
-//     fetchMessages();
-
-//     // Subscribe realtime
-//     const channel = supabase
-//       .channel("chat-messages")
-//       .on(
-//         "postgres_changes",
-//         { event: "INSERT", schema: "public", table: "chat_messages" },
-//         (payload) => {
-//           if (payload.new.session_id === sessionId) {
-//             setMessages((prev) => [...prev, payload.new as ChatMessage]);
-//           }
-//         }
-//       )
-//       .subscribe();
-
-//     return () => {
-//       supabase.removeChannel(channel);
-//     };
-//   }, [sessionId]);
-
-//   return (
-//     <div className="p-4">
-//       <h1 className="font-bold mb-4">Chat Session: {sessionId}</h1>
-//       <div className="space-y-2">
-//         {messages.map((m) => (
-//           <div
-//             key={m.id}
-//             className={`p-2 rounded ${
-//               m.sender === "user" ? "bg-blue-100 text-blue-800" : "bg-gray-200"
-//             }`}
-//           >
-//             <strong>{m.sender}:</strong> {m.message}
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
 
 "use client";
 
@@ -160,39 +94,6 @@ const ChatPage = () => {
   return (
     <DefaultLayout>
       <div className="flex min-h-screen w-full flex-col items-center justify-center space-y-4 px-4 py-8 bg-gray-100">
-        {messages.length === 0 ? (
-          <>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-3xl font-extrabold text-gray-900">HCSP-AI</h1>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M5 12L12 5L19 12"
-                  stroke="#22C55E"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 19V5"
-                  stroke="#22C55E"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <p className="max-w-md text-center text-base text-gray-600">
-              Welcome to HCSP-AI! Access insights to enhance decisions and build
-              teams.
-            </p>
-          </>
-        ) : (
           <div className="flex w-full max-w-2xl flex-col space-y-2 pb-32">
             {messages.map((msg) => (
               <div
@@ -221,7 +122,6 @@ const ChatPage = () => {
               </div>
             )}
           </div>
-        )}
 
         {/* Input */}
         <div className="w-full max-w-2xl mt-4 fixed bottom-0 bg-white rounded-xl">
